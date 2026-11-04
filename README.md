@@ -11,7 +11,7 @@ Create and install Nothing OS 5.0-style translucent icons on your phone. Making 
 
 ## Install IconGen: two supported methods
 
-**You must use either a PC with ADB or InstallerX Revived on the phone with Shizuku.** IconGen targets SDK 22, so Android blocks installation through the normal system installer. Simply downloading `IconGen.apk` and tapping the stock **Install** button will not work.
+You can install IconGen directly with Android's normal installer by downloading `IconGen.apk` and tapping **Install**.
 
 ### Requirements
 
@@ -25,10 +25,10 @@ Download `IconGen.apk` from [Releases](https://github.com/linuxct/nothing-iconge
 
 Enable USB debugging, connect the phone to your PC, and authorize the PC when Android asks.
 
-Install it with the low-target bypass (the app targets SDK 22):
+Install it:
 
 ```sh
-adb install -r --bypass-low-target-sdk-block IconGen.apk
+adb install -r IconGen.apk
 ```
 
 ### Method 2: on the phone with InstallerX Revived and Shizuku
