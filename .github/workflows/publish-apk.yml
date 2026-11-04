@@ -30,14 +30,17 @@ jobs:
           TAG_NAME="${{ github.ref_name }}"
 
           # Parse version code from latest release tag (build-1.0.0.N-...)
-          # If no releases exist, start at 2
+          # Ensure version code is higher than upstream linuxct (which is at 6)
           VERSION_CODE=$(gh release list --limit 50 --json tagName --jq '.[].tagName' 2>/dev/null \
             | grep '^build-1\.0\.0\.' \
             | sed 's/^build-1\.0\.0\.//;s/-.*$//' \
             | sort -n \
             | tail -n 1 \
-            || echo 1)
+            || echo 10)
 
+          if [ -z "$VERSION_CODE" ] || [ "$VERSION_CODE" -lt 10 ]; then
+            VERSION_CODE=10
+          fi
           VERSION_CODE=$((VERSION_CODE + 1))
           EPOCH=$(date +%s)
           VERSION_NAME="1.0.0.${VERSION_CODE}"

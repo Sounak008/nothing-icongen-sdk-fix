@@ -9,8 +9,12 @@ android {
 
     defaultConfig {
         applicationId = "space.linuxct.nothing.icongen"
-        minSdk = 22
+        minSdk = 26
         targetSdk = 36
+
+        ndk {
+            abiFilters += listOf("arm64-v8a")
+        }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
