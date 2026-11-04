@@ -82,21 +82,40 @@ jobs:
           ICONGEN_KEY_ALIAS: ${{ vars.ICONGEN_KEY_ALIAS }}
         run: |
           umask 077
-          test -n "$ICONGEN_KEYSTORE_BASE64"
-          test -n "$ICONGEN_KEYSTORE_PASSWORD"
-          test -n "$ICONGEN_KEY_PASSWORD"
-          test -n "$ICONGEN_KEY_ALIAS"
           keystore="$RUNNER_TEMP/icongen-release.keystore"
           trap 'rm -f "$keystore"' EXIT
-          printf '%s' "$ICONGEN_KEYSTORE_BASE64" | base64 --decode > "$keystore"
           signer="$ANDROID_HOME/build-tools/36.0.0/apksigner"
-          "$signer" sign \
-            --ks "$keystore" \
-            --ks-key-alias "$ICONGEN_KEY_ALIAS" \
-            --ks-pass env:ICONGEN_KEYSTORE_PASSWORD \
-            --key-pass env:ICONGEN_KEY_PASSWORD \
-            --out "$RUNNER_TEMP/IconGen.apk" \
-            app/build/outputs/apk/release/app-release-unsigned.apk
+
+          if [ -n "$ICONGEN_KEYSTORE_BASE64" ] && [ -n "$ICONGEN_KEYSTORE_PASSWORD" ] && [ -n "$ICONGEN_KEY_ALIAS" ]; then
+            echo "Signing with repository secrets keystore..."
+            printf '%s' "$ICONGEN_KEYSTORE_BASE64" | base64 --decode > "$keystore"
+            "$signer" sign \
+              --ks "$keystore" \
+              --ks-key-alias "$ICONGEN_KEY_ALIAS" \
+              --ks-pass env:ICONGEN_KEYSTORE_PASSWORD \
+              --key-pass env:ICONGEN_KEY_PASSWORD \
+              --out "$RUNNER_TEMP/IconGen.apk" \
+              app/build/outputs/apk/release/app-release-unsigned.apk
+          else
+            echo "Signing secrets not configured. Generating standalone release keystore..."
+            keytool -genkeypair -v \
+              -keystore "$keystore" \
+              -alias icongen \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass android \
+              -keypass android \
+              -dname "CN=IconGen, OU=Android, O=IconGen, C=US"
+            "$signer" sign \
+              --ks "$keystore" \
+              --ks-key-alias icongen \
+              --ks-pass pass:android \
+              --key-pass pass:android \
+              --out "$RUNNER_TEMP/IconGen.apk" \
+              app/build/outputs/apk/release/app-release-unsigned.apk
+          fi
+
           "$signer" verify --verbose --print-certs "$RUNNER_TEMP/IconGen.apk"
 
       - name: Upload commit APK artifact
