@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "space.linuxct.nothing.icongen"
         minSdk = 22
-        targetSdk = 22
+        targetSdk = 36
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
